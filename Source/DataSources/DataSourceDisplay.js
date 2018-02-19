@@ -110,6 +110,7 @@ define([
      */
     DataSourceDisplay.defaultVisualizersCallback = function(scene, entityCluster, dataSource) {
         var entities = dataSource.entities;
+        dataSoure._primitives = scene.primtiives.add(new PrimitiveCollection());
         return [new BillboardVisualizer(entityCluster, entities),
                 new GeometryVisualizer(BoxGeometryUpdater, scene, entities),
                 new GeometryVisualizer(CylinderGeometryUpdater, scene, entities),
@@ -356,11 +357,16 @@ define([
 
     DataSourceDisplay.prototype._onDataSourceAdded = function(dataSourceCollection, dataSource) {
         var scene = this._scene;
+        var primitives = scene.primitives.add(new PrimitiveCollection());
+        var groundPrimitives = scene.groundPrimitives.add(new PrimitiveCollection());
+
+        dataSource._primitives = primitives;
+        dataSource._groundPrimitives = groundPrimitives;
 
         var entityCluster = dataSource.clustering;
         entityCluster._initialize(scene);
 
-        scene.primitives.add(entityCluster);
+        primitives.add(entityCluster);
 
         dataSource._visualizers = this._visualizersCallback(scene, entityCluster, dataSource);
     };
