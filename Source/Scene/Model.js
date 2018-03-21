@@ -2953,11 +2953,20 @@ define([
 
             var rs = rendererRenderStates[material.technique];
 
-            // reverse for negative scales
-            var nodeScales = gltfNode.scale;
-            var scalesProd = nodeScales[0] * nodeScales[1] * nodeScales[2];
+            // reverse culling/winding order for odd number of negative scales
+            var determinantOfNodeMatrixOrTRS;
 
-            if (rs.cull.enabled && scalesProd < 0.0) {
+            if (defined(gltfNode.matrix)) {
+                // 4x4 transform matrix
+                determinantOfNodeMatrixOrTRS = Matrix4.determinant(gltfNode.matrix);
+            } else {
+                // TRS values
+                var nodeScales = gltfNode.scale;
+                determinantOfNodeMatrixOrTRS = nodeScales[0] * nodeScales[1] * nodeScales[2];
+            }
+            console.log("node determinant: " + determinantOfNodeMatrixOrTRS);
+
+            if (rs.cull.enabled && determinantOfNodeMatrixOrTRS < 0.0) {
                 rs = clone(rs, true);
                 rs.cull.face = (rs.cull.face === CullFace.BACK) ? CullFace.FRONT : CullFace.BACK;
                 rs = RenderState.fromCache(rs);
